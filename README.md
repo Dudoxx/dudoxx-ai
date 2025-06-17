@@ -1,4 +1,4 @@
-# @dudoxx/ai - DUDOXX AI SDK Provider
+# dudoxx-ai - DUDOXX AI SDK Provider
 
 Enterprise-grade AI SDK provider for DUDOXX language models with advanced reasoning capabilities and comprehensive tool support.
 
@@ -15,7 +15,7 @@ Enterprise-grade AI SDK provider for DUDOXX language models with advanced reason
 ## Installation
 
 ```bash
-npm install @dudoxx/ai
+npm install dudoxx-ai
 ```
 
 ## Setup
@@ -33,7 +33,7 @@ export DUDOXX_BASE_URL="https://llm-proxy.dudoxx.com/v1"  # Optional, this is th
 ### Text Generation
 
 ```typescript
-import { dudoxx } from '@dudoxx/ai';
+import { dudoxx } from 'dudoxx-ai';
 import { generateText } from 'ai';
 
 const { text } = await generateText({
@@ -47,7 +47,7 @@ console.log(text);
 ### Streaming
 
 ```typescript
-import { dudoxx } from '@dudoxx/ai';
+import { dudoxx } from 'dudoxx-ai';
 import { streamText } from 'ai';
 
 const { textStream } = await streamText({
@@ -63,7 +63,7 @@ for await (const delta of textStream) {
 ### Tool Calling
 
 ```typescript
-import { dudoxx } from '@dudoxx/ai';
+import { dudoxx } from 'dudoxx-ai';
 import { generateText } from 'ai';
 import { z } from 'zod';
 
@@ -88,7 +88,7 @@ const { text } = await generateText({
 ### Embeddings
 
 ```typescript
-import { dudoxx } from '@dudoxx/ai';
+import { dudoxx } from 'dudoxx-ai';
 import { embed } from 'ai';
 
 const { embedding } = await embed({
@@ -115,7 +115,7 @@ console.log(embedding);
 ### Provider Settings
 
 ```typescript
-import { createDudoxx } from '@dudoxx/ai';
+import { createDudoxx } from 'dudoxx-ai';
 
 const dudoxx = createDudoxx({
   apiKey: 'your-api-key', // defaults to DUDOXX_API_KEY env variable
@@ -176,7 +176,7 @@ const customDudoxx = createDudoxx({
 ### Error Handling
 
 ```typescript
-import { dudoxx } from '@dudoxx/ai';
+import { dudoxx } from 'dudoxx-ai';
 import { generateText } from 'ai';
 
 try {
