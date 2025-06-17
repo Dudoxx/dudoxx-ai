@@ -1,0 +1,78 @@
+{
+  "name": "@dudoxx/ai",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": false,
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "src/**/*",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "clean": "rm -rf dist",
+    "lint": "eslint \"./**/*.ts*\"",
+    "type-check": "tsc --noEmit",
+    "prettier-check": "prettier --check \"./**/*.ts*\"",
+    "test": "npm run test:node && npm run test:edge",
+    "test:edge": "vitest --config vitest.edge.config.js --run",
+    "test:node": "vitest --config vitest.node.config.js --run",
+    "test:node:watch": "vitest --config vitest.node.config.js",
+    "demo:generate": "tsx demos/generate.ts",
+    "demo:streaming": "tsx demos/streaming.ts",
+    "demo:embed": "tsx demos/embed.ts"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@ai-sdk/provider": "^1.1.3",
+    "@ai-sdk/provider-utils": "^2.2.8",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.24",
+    "ai": "^4.0.28",
+    "dotenv": "^16.0.0",
+    "tsup": "^8",
+    "tsx": "^4.7.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "description": "DUDOXX AI Provider for the AI SDK - Enterprise-grade LLM integration with reasoning capabilities",
+  "keywords": [
+    "ai",
+    "dudoxx",
+    "llm",
+    "provider",
+    "typescript",
+    "reasoning",
+    "enterprise",
+    "sdk"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dudoxx/dudoxx-ai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Dudoxx/dudoxx-ai/issues"
+  },
+  "homepage": "https://github.com/Dudoxx/dudoxx-ai#readme",
+  "author": "DUDOXX Team",
+  "publishConfig": {
+    "access": "public"
+  }
+}
