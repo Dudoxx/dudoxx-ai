@@ -1,6 +1,35 @@
 # @ai-sdk/dudoxx
 
-## 0.1.0
+## 1.1.0
+
+### Major Improvements
+
+- **Enhanced Tool Calls Handling**: Comprehensive improvements for Mistral LLM compatibility
+- **Robust ID Generation**: Automatic tool call ID generation for missing IDs in DUDOXX streaming
+- **Streaming Validation**: Added validation for malformed tool calls in streaming responses
+- **Error Handling**: Enhanced error recovery with detailed logging and fallback mechanisms
+- **Schema Validation**: Improved tool definition validation with descriptive error messages
+- **JSON Parsing**: Multiple extraction strategies for robust tool call parsing
+- **Execution Timeout**: 30-second timeout protection for tool execution
+- **Parameter Validation**: Enhanced type checking and structure validation
+- **Debugging**: Comprehensive error logging and execution timing information
+- **Compatibility**: Better Vercel AI SDK integration and improved streaming stability
+
+### Bug Fixes
+
+- Fixed missing tool call IDs causing validation errors
+- Resolved malformed response handling in streaming mode
+- Enhanced tool execution error recovery
+- Improved JSON argument validation
+- Added fallback mechanisms for corrupted tool calls
+
+### Performance
+
+- Added execution timeouts to prevent hanging tools
+- Optimized tool call processing with early validation
+- Improved error handling reduces debugging overhead
+
+## 1.0.0
 
 ### Major Changes
 

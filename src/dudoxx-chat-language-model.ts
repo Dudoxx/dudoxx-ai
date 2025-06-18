@@ -182,12 +182,32 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
 
     return {
       text: choice.message.content || '',
-      toolCalls: choice.message.tool_calls?.map(toolCall => ({
-        toolCallType: 'function',
-        toolCallId: toolCall.id,
-        toolName: toolCall.function.name,
-        args: toolCall.function.arguments!,
-      })),
+      toolCalls: choice.message.tool_calls?.map(toolCall => {
+        // Generate tool call ID if missing (DUDOXX fix)
+        const toolCallId = toolCall.id || `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}_${toolCall.function.name.substring(0, 8)}`;
+        
+        // Validate tool call structure
+        if (!toolCall.function?.name || typeof toolCall.function.name !== 'string') {
+          console.warn('Invalid tool call: missing or invalid function name', toolCall);
+          return null;
+        }
+
+        // Validate arguments JSON
+        let validatedArgs = toolCall.function.arguments || '{}';
+        try {
+          JSON.parse(validatedArgs);
+        } catch (error) {
+          console.warn('Invalid tool call arguments JSON, using empty object:', validatedArgs, error);
+          validatedArgs = '{}';
+        }
+
+        return {
+          toolCallType: 'function' as const,
+          toolCallId,
+          toolName: toolCall.function.name,
+          args: validatedArgs,
+        };
+      }).filter((toolCall): toolCall is NonNullable<typeof toolCall> => toolCall !== null),
       finishReason: mapDudoxxFinishReason(choice.finish_reason),
       usage: {
         promptTokens: response.usage?.prompt_tokens ?? 0,
@@ -284,22 +304,45 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
             if (delta.tool_calls != null) {
               for (const toolCall of delta.tool_calls) {
                 if (toolCall.function?.name != null) {
+                  // Generate tool call ID if missing (DUDOXX streaming fix)
+                  const toolCallId = toolCall.id || `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}_${toolCall.function.name.substring(0, 8)}`;
+                  
+                  // Validate tool call structure before processing
+                  if (!toolCall.function.name || typeof toolCall.function.name !== 'string') {
+                    console.warn('Invalid tool call: missing or invalid function name', toolCall);
+                    continue;
+                  }
+
                   controller.enqueue({
                     type: 'tool-call-delta',
                     toolCallType: 'function',
-                    toolCallId: toolCall.id,
+                    toolCallId,
                     toolName: toolCall.function.name,
                     argsTextDelta: toolCall.function.arguments || '',
                   });
 
                   if (toolCall.function.arguments != null) {
-                    controller.enqueue({
-                      type: 'tool-call',
-                      toolCallType: 'function',
-                      toolCallId: toolCall.id,
-                      toolName: toolCall.function.name,
-                      args: toolCall.function.arguments,
-                    });
+                    // Validate arguments are valid JSON string
+                    try {
+                      JSON.parse(toolCall.function.arguments);
+                      controller.enqueue({
+                        type: 'tool-call',
+                        toolCallType: 'function',
+                        toolCallId,
+                        toolName: toolCall.function.name,
+                        args: toolCall.function.arguments,
+                      });
+                    } catch (error) {
+                      console.warn('Invalid tool call arguments JSON:', toolCall.function.arguments, error);
+                      // Still enqueue with raw arguments for debugging
+                      controller.enqueue({
+                        type: 'tool-call',
+                        toolCallType: 'function',
+                        toolCallId,
+                        toolName: toolCall.function.name,
+                        args: toolCall.function.arguments,
+                      });
+                    }
                   }
                 }
               }

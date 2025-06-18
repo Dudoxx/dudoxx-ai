@@ -1,6 +1,6 @@
 {
   "name": "dudoxx-ai",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "MIT",
   "private": false,
   "sideEffects": false,
@@ -65,7 +65,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Dudoxx/dudoxx-ai.git"
+    "url": "git+https://github.com/Dudoxx/dudoxx-ai.git"
   },
   "bugs": {
     "url": "https://github.com/Dudoxx/dudoxx-ai/issues"

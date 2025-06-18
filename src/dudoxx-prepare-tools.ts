@@ -48,12 +48,43 @@ export function prepareTools(
     if (tool.type === 'provider-defined') {
       toolWarnings.push({ type: 'unsupported-tool', tool });
     } else {
+      // Validate tool structure
+      if (!tool.name || typeof tool.name !== 'string') {
+        toolWarnings.push({ 
+          type: 'other' as const, 
+          message: `Invalid tool name: ${tool.name}. Tool names must be non-empty strings.` 
+        });
+        continue;
+      }
+
+      // Validate tool name format (alphanumeric + underscores only)
+      if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(tool.name)) {
+        toolWarnings.push({ 
+          type: 'other' as const, 
+          message: `Invalid tool name format: ${tool.name}. Must start with letter and contain only alphanumeric characters and underscores.` 
+        });
+        continue;
+      }
+
+      // Validate parameters schema
+      if (tool.parameters && typeof tool.parameters === 'object') {
+        try {
+          JSON.stringify(tool.parameters);
+        } catch (error) {
+          toolWarnings.push({ 
+            type: 'other' as const, 
+            message: `Invalid parameters schema for tool ${tool.name}: ${error instanceof Error ? error.message : 'Unknown error'}` 
+          });
+          continue;
+        }
+      }
+
       dudoxxTools.push({
         type: 'function',
         function: {
           name: tool.name,
-          description: tool.description,
-          parameters: tool.parameters,
+          description: tool.description || `Tool: ${tool.name}`,
+          parameters: tool.parameters || { type: 'object', properties: {} },
         },
       });
     }
