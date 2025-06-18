@@ -26,7 +26,7 @@ async function testAIIntegration() {
     console.log('🔄 Making request to DUDOXX with weather tool...\n');
 
     const result = await generateText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME!, {
+      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.7,
         maxTokens: 500,
       }),
@@ -73,7 +73,7 @@ async function testAIIntegration() {
         if (step.toolResults && step.toolResults.length > 0) {
           console.log(`   📊 Tool Results: ${step.toolResults.length}`);
           step.toolResults.forEach((toolResult, resultIndex) => {
-            const result = toolResult.result as any;
+            const result = toolResult.result as { data?: unknown; message?: string; [key: string]: unknown };
             if (result?.data) {
               console.log(`      ${resultIndex + 1}. ${result.message || JSON.stringify(result.data)}`);
             } else {

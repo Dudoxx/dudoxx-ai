@@ -250,8 +250,6 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
       promptTokens: 0,
       completionTokens: 0,
     };
-    let totalChunks = 0;
-    let hasFinishReason = false;
     let chunkNumber = 0;
 
     return {
@@ -267,7 +265,6 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
             }
 
             chunkNumber++;
-            totalChunks = chunkNumber;
 
             const value = chunk.value;
 
@@ -290,7 +287,6 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
 
             if (choice?.finish_reason != null) {
               finishReason = mapDudoxxFinishReason(choice.finish_reason);
-              hasFinishReason = true;
             }
 
             if (choice?.delta == null) {

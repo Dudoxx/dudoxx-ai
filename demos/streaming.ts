@@ -193,6 +193,7 @@ async function streamingDemo() {
 
     const totalTime = Date.now() - startTime;
     const finalResult5 = await result5.text;
+    console.log(`Final result length: ${finalResult5.length} characters`);
 
     console.log('\n\nStreaming statistics:');
     console.log(`Total chunks: ${chunkCount}`);

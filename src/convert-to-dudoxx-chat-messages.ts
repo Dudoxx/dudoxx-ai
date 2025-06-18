@@ -75,11 +75,24 @@ export function convertToDudoxxChatMessages(
           }
         }
 
-        messages.push({
+        const assistantMessage: {
+          role: 'assistant';
+          content: string;
+          tool_calls?: Array<{
+            id: string;
+            type: 'function';
+            function: { name: string; arguments: string };
+          }>;
+        } = {
           role: 'assistant',
           content: text,
-          tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
-        });
+        };
+        
+        if (toolCalls.length > 0) {
+          assistantMessage.tool_calls = toolCalls;
+        }
+        
+        messages.push(assistantMessage);
 
         break;
       }

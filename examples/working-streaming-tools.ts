@@ -29,7 +29,7 @@ async function testWorkingStreamingWithTools() {
     console.log('🔄 Step 1: Complete tool interaction...\n');
     
     const toolResult = await generateText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME!, {
+      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.7,
         maxTokens: 500,
       }),
@@ -58,7 +58,7 @@ async function testWorkingStreamingWithTools() {
     console.log('🔄 Step 2: Streaming follow-up response...\n');
 
     const streamResult = await streamText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME!, {
+      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.7,
         maxTokens: 300,
       }),
@@ -77,13 +77,15 @@ async function testWorkingStreamingWithTools() {
     console.log('🌊 Streaming follow-up response:');
     console.log('─'.repeat(60));
 
-    let streamedText = '';
+    let charCount = 0;
     
     // Stream the follow-up response
     for await (const textPart of streamResult.textStream) {
       process.stdout.write(textPart);
-      streamedText += textPart;
+      charCount += textPart.length;
     }
+    
+    console.log(`\n📊 Streamed ${charCount} characters`);
 
     const finalUsage = await streamResult.usage;
 

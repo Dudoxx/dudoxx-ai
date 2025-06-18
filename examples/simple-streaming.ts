@@ -25,7 +25,7 @@ async function testSimpleStreaming() {
     console.log('🔄 Starting streaming request...\n');
 
     const result = await streamText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME!, {
+      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.7,
         maxTokens: 500,
       }),
@@ -52,6 +52,7 @@ async function testSimpleStreaming() {
     // Get final results
     const finalResult = await result.text;
     const usage = await result.usage;
+    console.log(`📝 Complete text length: ${finalResult.length} characters`);
 
     console.log('\n');
     console.log('─'.repeat(60));

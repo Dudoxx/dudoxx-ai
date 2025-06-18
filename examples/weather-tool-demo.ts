@@ -39,7 +39,7 @@ async function basicWeatherDemo() {
 
   try {
     const result = await generateText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME!, {
+      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.7,
       }),
       tools: {
@@ -86,7 +86,7 @@ async function streamingWeatherDemo() {
 
   try {
     const result = await streamText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME!, {
+      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.8,
       }),
       tools: {
@@ -131,7 +131,7 @@ async function weatherComparisonDemo() {
 
   try {
     const result = await generateText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME!, {
+      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.6,
       }),
       tools: {
@@ -170,7 +170,7 @@ async function errorHandlingDemo() {
 
   try {
     const result = await generateText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME!, {
+      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.5,
       }),
       tools: {

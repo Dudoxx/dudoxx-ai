@@ -1,6 +1,7 @@
 {
   "name": "dudoxx-ai",
-  "version": "1.2.1",
+  "version": "1.2.2",
+  "type": "module",
   "license": "MIT",
   "private": false,
   "sideEffects": false,
@@ -45,9 +46,15 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
+    "@eslint/js": "^9.29.0",
     "@types/node": "^20.17.24",
+    "@typescript-eslint/eslint-plugin": "^8.34.1",
+    "@typescript-eslint/parser": "^8.34.1",
     "ai": "^4.0.28",
     "dotenv": "^16.0.0",
+    "eslint": "^9.29.0",
+    "globals": "^16.2.0",
     "tsup": "^8",
     "tsx": "^4.7.0",
     "typescript": "^5.6.3",

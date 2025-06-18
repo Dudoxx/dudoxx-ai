@@ -25,7 +25,7 @@ async function testStreamingWithTools() {
     console.log('🔄 Starting streaming request with weather tool...\n');
 
     const result = await streamText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME!, {
+      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.7,
         maxTokens: 500,
       }),
@@ -70,15 +70,16 @@ async function testStreamingWithTools() {
           console.log(`   Args: ${JSON.stringify(part.args)}`);
           break;
           
-        case 'tool-result':
+        case 'tool-result': {
           console.log(`📊 Tool Result:`);
-          const toolResult = part.result as any;
+          const toolResult = part.result as { message?: string; [key: string]: unknown };
           if (toolResult?.message) {
             console.log(`   ${toolResult.message}`);
           } else {
             console.log(`   ${JSON.stringify(toolResult, null, 2)}`);
           }
           break;
+        }
           
         case 'text-delta':
           if (!finalText) {
@@ -97,7 +98,7 @@ async function testStreamingWithTools() {
           break;
           
         default:
-          console.log(`🔍 Unknown part type: ${(part as any).type}`);
+          console.log(`🔍 Unknown part type: ${(part as { type?: string }).type || 'unknown'}`);
       }
     }
 

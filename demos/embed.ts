@@ -197,6 +197,7 @@ async function embedDemo() {
       model: embeddingModel,
       values: comparisonTexts,
     });
+    console.log(`Generated ${batchCompEmbeddings.length} batch embeddings`);
     const batchCompEndTime = Date.now();
     const batchCompTime = batchCompEndTime - batchCompStartTime;
 
