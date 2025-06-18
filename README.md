@@ -1,6 +1,6 @@
 # DUDOXX AI Provider
 
-![DUDOXX AI Provider](./docs/images/hero-banner.png)
+![DUDOXX AI Provider](https://raw.githubusercontent.com/Dudoxx/dudoxx-ai/main/docs/images/hero-banner.png)
 
 [![npm version](https://badge.fury.io/js/dudoxx-ai.svg)](https://badge.fury.io/js/dudoxx-ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -15,7 +15,7 @@ The DUDOXX AI Provider is a production-ready TypeScript package that seamlessly 
 
 ### ✨ Key Features
 
-![Enterprise Features](./docs/images/enterprise-features.png)
+![Enterprise Features](https://raw.githubusercontent.com/Dudoxx/dudoxx-ai/main/docs/images/enterprise-features.png)
 
 - **🧠 Advanced Reasoning**: Support for DUDOXX reasoning models with configurable effort levels
 - **⚡ High Performance**: Optimized for production workloads with streaming support
@@ -34,7 +34,7 @@ The DUDOXX AI Provider is a production-ready TypeScript package that seamlessly 
 
 ## 📦 Installation
 
-![Installation Steps](./docs/images/installation-steps.png)
+![Installation Steps](https://raw.githubusercontent.com/Dudoxx/dudoxx-ai/main/docs/images/installation-steps.png)
 
 ```bash
 npm install dudoxx-ai
@@ -46,7 +46,7 @@ pnpm add dudoxx-ai
 
 ## 🏗️ Architecture
 
-![Architecture Flow](./docs/images/architecture-flow.png)
+![Architecture Flow](https://raw.githubusercontent.com/Dudoxx/dudoxx-ai/main/docs/images/architecture-flow.png)
 
 The DUDOXX AI Provider follows a clean architecture pattern:
 
@@ -95,7 +95,7 @@ DUDOXX_REASONING_EFFORT=medium
 
 ## 🔧 vLLM Integration
 
-![vLLM Deployment](./docs/images/vllm-deployment.png)
+![vLLM Deployment](https://raw.githubusercontent.com/Dudoxx/dudoxx-ai/main/docs/images/vllm-deployment.png)
 
 The DUDOXX AI Provider is optimized for **Mistral Small** and **Nemo LLM** models served via vLLM. This setup provides enterprise-grade performance with advanced tool calling capabilities.
 
@@ -144,7 +144,7 @@ const dudoxx = createDudoxx({
 
 ## 💡 Usage Examples
 
-![Code Examples](./docs/images/code-examples.png)
+![Code Examples](https://raw.githubusercontent.com/Dudoxx/dudoxx-ai/main/docs/images/code-examples.png)
 
 ### 1. Text Generation
 
@@ -695,7 +695,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/dudoxx-ai.git
+git clone https://github.com/Dudoxx/dudoxx-ai.git
 
 # Install dependencies
 npm install
@@ -716,10 +716,10 @@ See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 
 ## 🆘 Support
 
-- 📚 **Documentation**: [Full API Documentation](https://docs.dudoxx.com)
+- 📚 **Documentation**: [Full API Documentation](https://github.com/Dudoxx/dudoxx-ai#readme)
 - 💬 **Community**: [Discord Community](https://discord.gg/dudoxx)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/your-org/dudoxx-ai/issues)
-- 📧 **Enterprise Support**: [enterprise@dudoxx.com](mailto:enterprise@dudoxx.com)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/Dudoxx/dudoxx-ai/issues)
+- 📧 **Enterprise Support**: [contact@dudoxx.com](mailto:contact@dudoxx.com)
 
 ## 📄 License
 
