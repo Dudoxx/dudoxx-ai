@@ -15,3 +15,16 @@ export type {
 } from './dudoxx-embedding-settings';
 
 export type { DudoxxErrorData } from './dudoxx-error';
+
+// Tools
+export {
+  weatherTool,
+  aiSdkWeatherTool,
+  getWeather,
+  formatWeatherInfo,
+  weatherToolSchema,
+} from './tools/weather-tool';
+export type {
+  WeatherToolParams,
+  WeatherInfo,
+} from './tools/weather-tool';

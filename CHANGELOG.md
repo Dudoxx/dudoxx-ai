@@ -1,5 +1,40 @@
 # @ai-sdk/dudoxx
 
+## 1.2.0
+
+### New Features
+
+- **Mock Weather Tool**: Added comprehensive weather tool for demonstration and testing
+- **Tool Examples**: Complete usage examples with .env.local configuration
+- **Standalone Weather API**: Direct weather tool usage without AI SDK integration
+- **Temperature Conversion**: Support for both Celsius and Fahrenheit units
+- **Mock Data Coverage**: Pre-configured data for 8 major cities with fallback for unknown locations
+- **Error Handling**: Robust error handling and graceful degradation
+- **TypeScript Support**: Full type definitions for weather tool interfaces
+
+### Tool Features
+
+- **City Support**: New York, London, Tokyo, Paris, Sydney, Berlin, Toronto, Dubai
+- **Weather Data**: Temperature, condition, humidity, wind speed, and detailed descriptions
+- **Random Generation**: Realistic weather data for unlisted cities
+- **API Simulation**: Simulated API delays for realistic testing
+- **Format Utilities**: Pretty-printed weather information formatting
+
+### Usage Examples
+
+- `examples/simple-weather-example.ts`: Basic weather tool usage
+- `examples/weather-tool-demo.ts`: Comprehensive demonstration with streaming
+- `examples/test-weather-standalone.ts`: Direct tool testing
+- `examples/test-ai-integration.ts`: AI SDK integration testing
+
+### Tests
+
+- **Comprehensive Test Suite**: 21 test cases covering all weather tool functionality
+- **Parameter Validation**: Zod schema validation testing
+- **Error Scenarios**: Error handling and fallback testing
+- **City Coverage**: Tests for all pre-configured cities
+- **Integration Tests**: AI SDK tool integration validation
+
 ## 1.1.0
 
 ### Major Improvements
