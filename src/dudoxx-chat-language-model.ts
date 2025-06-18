@@ -247,9 +247,11 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
 
     let finishReason: LanguageModelV1FinishReason = 'unknown';
     let usage: { promptTokens: number; completionTokens: number } = {
-      promptTokens: Number.NaN,
-      completionTokens: Number.NaN,
+      promptTokens: 0,
+      completionTokens: 0,
     };
+    let totalChunks = 0;
+    let hasFinishReason = false;
     let chunkNumber = 0;
 
     return {
@@ -265,6 +267,7 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
             }
 
             chunkNumber++;
+            totalChunks = chunkNumber;
 
             const value = chunk.value;
 
@@ -275,10 +278,11 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
               });
             }
 
+            // Check for usage data in streaming chunks
             if (value.usage != null) {
               usage = {
-                promptTokens: value.usage.prompt_tokens,
-                completionTokens: value.usage.completion_tokens,
+                promptTokens: value.usage.prompt_tokens || 0,
+                completionTokens: value.usage.completion_tokens || 0,
               };
             }
 
@@ -286,6 +290,7 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
 
             if (choice?.finish_reason != null) {
               finishReason = mapDudoxxFinishReason(choice.finish_reason);
+              hasFinishReason = true;
             }
 
             if (choice?.delta == null) {
@@ -338,6 +343,8 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
           },
 
           flush(controller) {
+            // If DUDOXX streaming didn't provide usage data, we can't accurately estimate
+            // So we leave it as 0 rather than providing potentially wrong estimates
             controller.enqueue({ type: 'finish', finishReason, usage });
           },
         }),

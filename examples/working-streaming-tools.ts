@@ -90,9 +90,16 @@ async function testWorkingStreamingWithTools() {
     console.log('\n');
     console.log('─'.repeat(60));
     console.log('\n📊 Final Results:');
-    console.log(`🔢 Total Tokens: ${finalUsage.totalTokens}`);
-    console.log(`🔢 Prompt Tokens: ${finalUsage.promptTokens}`);
-    console.log(`🔢 Completion Tokens: ${finalUsage.completionTokens}`);
+    
+    // Handle streaming usage data limitation
+    if (finalUsage.totalTokens > 0 || finalUsage.promptTokens > 0 || finalUsage.completionTokens > 0) {
+      console.log(`🔢 Total Tokens: ${finalUsage.totalTokens}`);
+      console.log(`🔢 Prompt Tokens: ${finalUsage.promptTokens}`);
+      console.log(`🔢 Completion Tokens: ${finalUsage.completionTokens}`);
+    } else {
+      console.log('🔢 Streaming Token Usage: Not available for DUDOXX provider');
+      console.log('💡 Note: generateText() provides accurate token counts, streamText() focuses on real-time output');
+    }
 
     console.log('\n✅ Complete workflow demonstration finished successfully!');
     console.log('\n📝 Summary:');

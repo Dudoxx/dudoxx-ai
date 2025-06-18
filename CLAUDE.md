@@ -196,6 +196,13 @@ for await (const textPart of result.textStream) {
 2. Use `streamText` for follow-up questions or detailed explanations
 3. Both approaches work seamlessly with the DUDOXX provider
 
+**Important Note: Token Usage in Streaming Mode**
+The DUDOXX API currently does not provide token usage data in streaming responses. This means:
+- `streamText()` will return 0 for all token counts (promptTokens, completionTokens, totalTokens)
+- `generateText()` provides accurate token usage information
+- If you need precise token counts, use `generateText()` instead of `streamText()`
+- This is a limitation of the DUDOXX streaming API, not the provider implementation
+
 ### Testing Requirements
 Always run both Node.js and Edge runtime tests when making changes:
 - Node.js tests validate core functionality

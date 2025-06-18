@@ -56,9 +56,16 @@ async function testSimpleStreaming() {
     console.log('\n');
     console.log('─'.repeat(60));
     console.log('\n📊 Final Results:');
-    console.log(`🔢 Total Tokens: ${usage.totalTokens}`);
-    console.log(`🔢 Prompt Tokens: ${usage.promptTokens}`);
-    console.log(`🔢 Completion Tokens: ${usage.completionTokens}`);
+    
+    // Handle the case where DUDOXX streaming doesn't provide usage data
+    if (usage.totalTokens > 0 || usage.promptTokens > 0 || usage.completionTokens > 0) {
+      console.log(`🔢 Total Tokens: ${usage.totalTokens}`);
+      console.log(`🔢 Prompt Tokens: ${usage.promptTokens}`);
+      console.log(`🔢 Completion Tokens: ${usage.completionTokens}`);
+    } else {
+      console.log('🔢 Token Usage: Not available in streaming mode for DUDOXX provider');
+      console.log('💡 Note: Use generateText() instead of streamText() to get accurate token counts');
+    }
 
     console.log('\n✅ Simple streaming test completed successfully!');
 
