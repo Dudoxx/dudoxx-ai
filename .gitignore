@@ -72,8 +72,8 @@ pids
 tmp/
 temp/
 
-# Documentation build
-docs/
+# Documentation build (excluding images)
+# docs/ - commented out to include images for npmjs
 
 # ESLint cache
 .eslintcache
