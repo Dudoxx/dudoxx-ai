@@ -33,6 +33,7 @@ async function testAIIntegration() {
       tools: {
         get_weather: aiSdkWeatherTool,
       },
+      maxSteps: 5, // Allow multiple steps for tool calls and final response
       messages: [
         {
           role: 'system',
@@ -45,29 +46,47 @@ async function testAIIntegration() {
       ],
     });
 
-    console.log('📊 Response Details:');
+    console.log('📊 Conversation Flow:');
     console.log('─'.repeat(40));
-    console.log(`✅ Text Response: ${result.text || '(no text response)'}`);
-    console.log(`📝 Tool Calls: ${result.toolCalls?.length || 0}`);
+    console.log(`🔢 Total Steps: ${result.steps?.length || 1}`);
     console.log(`🔢 Total Tokens: ${result.usage?.totalTokens || 'N/A'}`);
     console.log(`🔢 Prompt Tokens: ${result.usage?.promptTokens || 'N/A'}`);
     console.log(`🔢 Completion Tokens: ${result.usage?.completionTokens || 'N/A'}`);
 
-    if (result.toolCalls && result.toolCalls.length > 0) {
-      console.log('\n🔧 Tool Call Details:');
-      result.toolCalls.forEach((call, index) => {
-        console.log(`${index + 1}. Tool: ${call.toolName}`);
-        console.log(`   ID: ${call.toolCallId}`);
-        console.log(`   Args: ${call.args}`);
+    // Show each step in the conversation
+    if (result.steps && result.steps.length > 0) {
+      console.log('\n🔄 Step-by-Step Flow:');
+      result.steps.forEach((step, index) => {
+        console.log(`\nStep ${index + 1}:`);
+        
+        if (step.text) {
+          console.log(`   💬 Assistant: ${step.text}`);
+        }
+        
+        if (step.toolCalls && step.toolCalls.length > 0) {
+          console.log(`   🔧 Tool Calls: ${step.toolCalls.length}`);
+          step.toolCalls.forEach((call, callIndex) => {
+            console.log(`      ${callIndex + 1}. ${call.toolName}(${JSON.stringify(call.args)})`);
+          });
+        }
+        
+        if (step.toolResults && step.toolResults.length > 0) {
+          console.log(`   📊 Tool Results: ${step.toolResults.length}`);
+          step.toolResults.forEach((toolResult, resultIndex) => {
+            const result = toolResult.result as any;
+            if (result?.data) {
+              console.log(`      ${resultIndex + 1}. ${result.message || JSON.stringify(result.data)}`);
+            } else {
+              console.log(`      ${resultIndex + 1}. ${JSON.stringify(toolResult.result)}`);
+            }
+          });
+        }
       });
     }
 
-    if (result.toolResults && result.toolResults.length > 0) {
-      console.log('\n📊 Tool Results:');
-      result.toolResults.forEach((toolResult, index) => {
-        console.log(`${index + 1}. Result:`, JSON.stringify(toolResult.result, null, 2));
-      });
-    }
+    console.log('\n✅ Final Response:');
+    console.log('─'.repeat(40));
+    console.log(result.text || '(no final text response)');
 
     console.log('\n✅ AI Integration test completed successfully!');
 

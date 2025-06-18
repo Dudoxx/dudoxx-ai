@@ -303,10 +303,11 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
 
             if (delta.tool_calls != null) {
               for (const toolCall of delta.tool_calls) {
+                // Generate tool call ID if missing (DUDOXX streaming fix)
+                const toolCallId = toolCall.id || `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+                
+                // Handle tool call initialization
                 if (toolCall.function?.name != null) {
-                  // Generate tool call ID if missing (DUDOXX streaming fix)
-                  const toolCallId = toolCall.id || `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}_${toolCall.function.name.substring(0, 8)}`;
-                  
                   // Validate tool call structure before processing
                   if (!toolCall.function.name || typeof toolCall.function.name !== 'string') {
                     console.warn('Invalid tool call: missing or invalid function name', toolCall);
@@ -320,30 +321,17 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
                     toolName: toolCall.function.name,
                     argsTextDelta: toolCall.function.arguments || '',
                   });
+                }
 
-                  if (toolCall.function.arguments != null) {
-                    // Validate arguments are valid JSON string
-                    try {
-                      JSON.parse(toolCall.function.arguments);
-                      controller.enqueue({
-                        type: 'tool-call',
-                        toolCallType: 'function',
-                        toolCallId,
-                        toolName: toolCall.function.name,
-                        args: toolCall.function.arguments,
-                      });
-                    } catch (error) {
-                      console.warn('Invalid tool call arguments JSON:', toolCall.function.arguments, error);
-                      // Still enqueue with raw arguments for debugging
-                      controller.enqueue({
-                        type: 'tool-call',
-                        toolCallType: 'function',
-                        toolCallId,
-                        toolName: toolCall.function.name,
-                        args: toolCall.function.arguments,
-                      });
-                    }
-                  }
+                // Handle arguments streaming
+                if (toolCall.function?.arguments != null) {
+                  controller.enqueue({
+                    type: 'tool-call-delta',
+                    toolCallType: 'function',
+                    toolCallId,
+                    toolName: toolCall.function.name || '',
+                    argsTextDelta: toolCall.function.arguments,
+                  });
                 }
               }
             }
@@ -375,7 +363,7 @@ const dudoxxChatResponseSchema = z.object({
         tool_calls: z
           .array(
             z.object({
-              id: z.string(),
+              id: z.string().optional(), // Made optional for DUDOXX compatibility
               type: z.literal('function'),
               function: z.object({
                 name: z.string(),
@@ -412,7 +400,7 @@ const dudoxxChatChunkSchema = z.object({
           .array(
             z.object({
               index: z.number().optional(),
-              id: z.string(),
+              id: z.string().optional(), // Made optional for DUDOXX compatibility
               type: z.literal('function').optional(),
               function: z
                 .object({

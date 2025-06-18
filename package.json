@@ -25,7 +25,11 @@
     "test:node:watch": "vitest --config vitest.node.config.js",
     "demo:generate": "tsx demos/generate.ts",
     "demo:streaming": "tsx demos/streaming.ts",
-    "demo:embed": "tsx demos/embed.ts"
+    "demo:embed": "tsx demos/embed.ts",
+    "example:ai-integration": "tsx examples/test-ai-integration.ts",
+    "example:streaming-tools": "tsx examples/streaming-with-tools.ts",
+    "example:working-streaming": "tsx examples/working-streaming-tools.ts",
+    "example:simple-streaming": "tsx examples/simple-streaming.ts"
   },
   "exports": {
     "./package.json": "./package.json",
