@@ -47,10 +47,10 @@ async function basicWeatherDemo() {
       model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.7,
       }),
+      maxTokens: 500,
       tools: {
         get_weather: aiSdkWeatherTool,
       },
-      maxTokens: 500,
       messages: [
         {
           role: 'user',
@@ -94,10 +94,10 @@ async function streamingWeatherDemo() {
       model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.8,
       }),
+      maxTokens: 600,
       tools: {
         get_weather: aiSdkWeatherTool,
       },
-      maxTokens: 600,
       messages: [
         {
           role: 'user',
@@ -115,11 +115,12 @@ async function streamingWeatherDemo() {
     console.log('\n\n🔧 Tool Usage Summary:');
     const finalResult = await result.response;
     
-    if (finalResult.toolCalls?.length) {
-      finalResult.toolCalls.forEach((call, index) => {
-        console.log(`${index + 1}. Tool: ${call.toolName}`);
-        console.log(`   Args: ${call.args}`);
-      });
+    // For streaming, tool calls are accessed differently
+    if (finalResult.messages?.length) {
+      console.log('✅ Streaming completed successfully');
+      console.log(`Messages in response: ${finalResult.messages.length}`);
+    } else {
+      console.log('No specific tool call information available in streaming mode');
     }
 
   } catch (error) {
@@ -139,10 +140,10 @@ async function weatherComparisonDemo() {
       model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.6,
       }),
+      maxTokens: 800,
       tools: {
         get_weather: aiSdkWeatherTool,
       },
-      maxTokens: 800,
       messages: [
         {
           role: 'user',
@@ -178,10 +179,10 @@ async function errorHandlingDemo() {
       model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.5,
       }),
+      maxTokens: 400,
       tools: {
         get_weather: aiSdkWeatherTool,
       },
-      maxTokens: 400,
       messages: [
         {
           role: 'user',

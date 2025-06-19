@@ -32,8 +32,8 @@ async function testStreamingWithTools() {
     const result = await streamText({
       model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.7,
-        maxTokens: 500,
       }),
+      maxTokens: 500,
       tools: {
         get_weather: aiSdkWeatherTool,
       },
@@ -59,9 +59,8 @@ async function testStreamingWithTools() {
     // Stream the response step by step
     console.log('💬 Streaming conversation:');
     
-    // Use the baseStream which contains the raw streaming parts
-    for await (const streamPart of result.baseStream) {
-      const part = streamPart.part;
+    // Use the fullStream which contains the raw streaming parts  
+    for await (const part of result.fullStream) {
       
       switch (part.type) {
         case 'step-start':

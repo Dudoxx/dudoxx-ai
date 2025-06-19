@@ -260,7 +260,10 @@ export class DudoxxChatLanguageModel implements LanguageModelV1 {
         >({
           transform(chunk, controller) {
             if (!chunk.success) {
-              controller.enqueue({ type: 'error', error: chunk.error });
+              controller.enqueue({ 
+                type: 'error', 
+                error: new Error('Parse error occurred') 
+              });
               return;
             }
 

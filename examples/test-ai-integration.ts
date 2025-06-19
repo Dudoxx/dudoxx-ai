@@ -33,8 +33,8 @@ async function testAIIntegration() {
     const result = await generateText({
       model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.7,
-        maxTokens: 500,
       }),
+      maxTokens: 500,
       tools: {
         get_weather: aiSdkWeatherTool,
       },
