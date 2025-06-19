@@ -75,24 +75,21 @@ export function convertToDudoxxChatMessages(
           }
         }
 
-        const assistantMessage: {
-          role: 'assistant';
-          content: string;
-          tool_calls?: Array<{
-            id: string;
-            type: 'function';
-            function: { name: string; arguments: string };
-          }>;
-        } = {
-          role: 'assistant',
-          content: text,
-        };
-        
+        // DUDOXX compatibility: assistant message must have either content OR tool_calls, not both
         if (toolCalls.length > 0) {
-          assistantMessage.tool_calls = toolCalls;
+          // If there are tool calls, send tool calls only (no content)
+          messages.push({
+            role: 'assistant',
+            content: null as any, // DUDOXX requires null content when tool_calls present
+            tool_calls: toolCalls,
+          });
+        } else if (text) {
+          // If there's text content, send content only (no tool_calls)
+          messages.push({
+            role: 'assistant',
+            content: text,
+          });
         }
-        
-        messages.push(assistantMessage);
 
         break;
       }

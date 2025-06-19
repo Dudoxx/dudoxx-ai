@@ -129,7 +129,7 @@ describe('convertToDudoxxChatMessages', () => {
     expect(result).toStrictEqual([
       {
         role: 'assistant',
-        content: 'I will call a tool for you.',
+        content: null, // DUDOXX requires null content when tool_calls present
         tool_calls: [
           {
             id: 'call_123',
@@ -213,7 +213,7 @@ describe('convertToDudoxxChatMessages', () => {
       },
       {
         role: 'assistant',
-        content: 'I will check the weather for you.',
+        content: null, // DUDOXX requires null content when tool_calls present
         tool_calls: [
           {
             id: 'call_123',
