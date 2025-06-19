@@ -5,13 +5,34 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 import { streamText } from 'ai';
-import { createDudoxx } from '../src/index';
+import { 
+  createDudoxx,
+  getStreamingMetadata,
+  globalToolMonitor,
+  withRetry,
+  classifyError,
+  DudoxxResponseMetadata 
+} from '../src/index';
 
 /**
  * Demo: Streaming text generation with DUDOXX models
  */
 async function streamingDemo() {
-  console.log('🌊 DUDOXX Streaming Demo\n');
+  console.log('🌊 DUDOXX Enhanced Streaming Demo\n');
+
+  // Configure enhanced monitoring for streaming
+  globalToolMonitor.updateConfig({
+    timeoutMs: 30000,
+    maxRetries: 3,
+    enableMetrics: true,
+    enablePerformanceTracking: true,
+  });
+
+  console.log('📊 Enhanced Streaming Features:');
+  console.log('- Real-time performance monitoring');
+  console.log('- Streaming metadata with throughput analysis');
+  console.log('- Error recovery and retry mechanisms');
+  console.log('- Comprehensive streaming analytics\n');
 
   // Initialize DUDOXX provider
   const dudoxx = createDudoxx({
@@ -240,21 +261,30 @@ async function streamingDemo() {
   }
 }
 
-// Performance monitoring utilities
+// Enhanced performance monitoring utilities
 class StreamingMonitor {
   private startTime: number = 0;
   private chunkCount: number = 0;
   private totalChars: number = 0;
+  private firstChunkTime?: number;
+  private lastChunkTime?: number;
 
   start() {
     this.startTime = Date.now();
     this.chunkCount = 0;
     this.totalChars = 0;
+    this.firstChunkTime = undefined;
+    this.lastChunkTime = undefined;
   }
 
   addChunk(chunk: string) {
     this.chunkCount++;
     this.totalChars += chunk.length;
+    this.lastChunkTime = Date.now();
+    
+    if (!this.firstChunkTime) {
+      this.firstChunkTime = Date.now();
+    }
   }
 
   getStats() {
@@ -263,9 +293,23 @@ class StreamingMonitor {
       duration,
       chunkCount: this.chunkCount,
       totalChars: this.totalChars,
-      avgChunkSize: Math.round(this.totalChars / this.chunkCount),
-      charsPerSecond: Math.round(this.totalChars / (duration / 1000)),
+      avgChunkSize: this.chunkCount > 0 ? Math.round(this.totalChars / this.chunkCount) : 0,
+      charsPerSecond: duration > 0 ? Math.round(this.totalChars / (duration / 1000)) : 0,
+      timeToFirstChunk: this.firstChunkTime ? this.firstChunkTime - this.startTime : 0,
     };
+  }
+
+  getStreamingMetadata(): DudoxxResponseMetadata {
+    return getStreamingMetadata(
+      { id: 'streaming-demo', model: 'dudoxx', created: Math.floor(Date.now() / 1000) },
+      {
+        chunksReceived: this.chunkCount,
+        bytesReceived: this.totalChars,
+        streamStartTime: this.startTime,
+        firstChunkTime: this.firstChunkTime,
+        lastChunkTime: this.lastChunkTime,
+      }
+    );
   }
 }
 
@@ -301,16 +345,26 @@ async function advancedStreamingDemo() {
   }
 
   const stats = monitor.getStats();
-  console.log('\n\nPerformance Analysis:');
+  const metadata = monitor.getStreamingMetadata();
+
+  console.log('\n\n📊 Enhanced Performance Analysis:');
   console.log(`Duration: ${stats.duration}ms`);
   console.log(`Chunks: ${stats.chunkCount}`);
   console.log(`Characters: ${stats.totalChars}`);
   console.log(`Avg chunk size: ${stats.avgChunkSize}`);
   console.log(`Speed: ${stats.charsPerSecond} chars/sec`);
+  console.log(`Time to first chunk: ${stats.timeToFirstChunk}ms`);
+
+  if (metadata.streaming) {
+    console.log('\n🌊 Streaming Metadata:');
+    console.log(`Throughput: ${metadata.streaming.throughputBytesPerSecond.toFixed(0)} bytes/sec`);
+    console.log(`Stream duration: ${metadata.streaming.streamDurationMs}ms`);
+    console.log(`Average chunk size: ${metadata.streaming.averageChunkSize.toFixed(1)} bytes`);
+  }
 }
 
 // Run if called directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   async function runDemo() {
     await streamingDemo();
     await advancedStreamingDemo();

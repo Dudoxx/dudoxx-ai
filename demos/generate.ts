@@ -5,13 +5,34 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 import { generateText } from 'ai';
-import { createDudoxx } from '../src/index';
+import { 
+  createDudoxx, 
+  globalToolMonitor, 
+  withRetry, 
+  classifyError,
+  DudoxxRateLimitError,
+  DudoxxTimeoutError 
+} from '../src/index';
 
 /**
  * Demo: Basic text generation with DUDOXX models
  */
 async function generateDemo() {
-  console.log('🚀 DUDOXX Generate Demo\n');
+  console.log('🚀 DUDOXX Generate Demo with Enhanced Features\n');
+
+  // Configure enhanced monitoring
+  globalToolMonitor.updateConfig({
+    timeoutMs: 30000,
+    maxRetries: 3,
+    enableMetrics: true,
+    enablePerformanceTracking: true,
+  });
+
+  console.log('📊 Enhanced Features Enabled:');
+  console.log('- Global tool execution monitoring');
+  console.log('- Automatic retry with exponential backoff');
+  console.log('- Comprehensive error handling and classification');
+  console.log('- Performance tracking and analytics\n');
 
   // Initialize DUDOXX provider
   const dudoxx = createDudoxx({
@@ -112,8 +133,36 @@ async function generateDemo() {
       console.log(`A${index + 1}: ${text.trim()}\n`);
     }
 
-    // 5. Performance test
-    console.log('5. Performance Test');
+    // 5. Enhanced error handling demonstration
+    console.log('5. Enhanced Error Handling Demo');
+    console.log('='.repeat(40));
+
+    console.log('Testing retry mechanism with withRetry wrapper...');
+
+    const resilientGeneration = await withRetry(
+      async () => {
+        // This might fail intermittently, demonstrating retry logic
+        const { text } = await generateText({
+          model: quickModel,
+          maxTokens: 100,
+          prompt: 'Explain the benefits of error handling in AI applications.',
+        });
+        return text;
+      },
+      3, // max retries
+      (error) => {
+        const classification = classifyError(error);
+        console.log(`Error classified as: ${classification.type} (retryable: ${classification.isRetryable})`);
+        return classification.isRetryable;
+      }
+    );
+
+    console.log('Resilient generation result:');
+    console.log(resilientGeneration);
+    console.log('');
+
+    // 6. Performance test with monitoring
+    console.log('6. Performance Test with Monitoring');
     console.log('='.repeat(40));
 
     const startTime = Date.now();
@@ -140,23 +189,48 @@ async function generateDemo() {
     console.log(`\nTotal time: ${totalTime}ms`);
     console.log(`Average per request: ${Math.round(totalTime / 3)}ms`);
 
+    // Enhanced monitoring statistics
+    console.log('\n📊 Enhanced Monitoring Statistics:');
+    console.log('='.repeat(40));
+    const monitorStats = globalToolMonitor.getExecutionStats();
+    console.log(`Tool executions completed: ${monitorStats.totalCompleted}`);
+    console.log(`Success rate: ${(monitorStats.successRate * 100).toFixed(1)}%`);
+    console.log(`Average execution time: ${monitorStats.averageDuration.toFixed(0)}ms`);
+    console.log(`Error rate: ${(monitorStats.errorRate * 100).toFixed(1)}%`);
+
     // Summary
     const totalTokens = [usage, reasoningUsage, creativeUsage]
       .filter(u => u?.totalTokens)
       .reduce((sum, u) => sum + (u?.totalTokens || 0), 0);
 
-    console.log('\n✅ Generate demo completed successfully!');
+    console.log('\n✅ Enhanced Generate demo completed successfully!');
     console.log(`Total tokens used: ${totalTokens}`);
-    console.log('All DUDOXX models are working correctly.\n');
+    console.log('🎯 Enhanced features demonstrated:');
+    console.log('- Error handling and retry mechanisms');
+    console.log('- Performance monitoring and analytics');
+    console.log('- Comprehensive tool execution tracking');
+    console.log('All DUDOXX models are working correctly with enhanced capabilities.\n');
 
   } catch (error) {
     console.error('❌ Generate demo failed:', error);
+    
+    // Enhanced error reporting
+    const classification = classifyError(error);
+    console.error(`Error type: ${classification.type}`);
+    console.error(`Retryable: ${classification.isRetryable}`);
+    
+    if (error instanceof DudoxxRateLimitError) {
+      console.error(`Rate limit - retry after: ${error.retryAfter}s`);
+    } else if (error instanceof DudoxxTimeoutError) {
+      console.error(`Timeout - duration: ${error.timeoutMs}ms`);
+    }
+    
     throw error;
   }
 }
 
 // Run if called directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   generateDemo();
 }
 

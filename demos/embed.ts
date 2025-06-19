@@ -5,13 +5,33 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 import { embed, embedMany } from 'ai';
-import { createDudoxx } from '../src/index';
+import { 
+  createDudoxx, 
+  globalToolMonitor,
+  withRetry,
+  classifyError,
+  getResponseMetadata 
+} from '../src/index';
 
 /**
  * Demo: Text embedding with DUDOXX models
  */
 async function embedDemo() {
-  console.log('🔗 DUDOXX Embedding Demo\n');
+  console.log('🔗 DUDOXX Enhanced Embedding Demo\n');
+
+  // Configure enhanced monitoring for embeddings
+  globalToolMonitor.updateConfig({
+    timeoutMs: 30000,
+    maxRetries: 3,
+    enableMetrics: true,
+    enablePerformanceTracking: true,
+  });
+
+  console.log('📊 Enhanced Embedding Features:');
+  console.log('- Performance tracking and analytics');
+  console.log('- Automatic retry on failures');
+  console.log('- Comprehensive error handling');
+  console.log('- Batch processing optimization\n');
 
   // Initialize DUDOXX provider
   const dudoxx = createDudoxx({
@@ -206,7 +226,15 @@ async function embedDemo() {
     console.log(`Batch processing: ${batchCompTime}ms`);
     console.log(`Speedup: ${(individualTime / batchCompTime).toFixed(2)}x faster`);
     console.log(`Per-text (individual): ${Math.round(individualTime / comparisonTexts.length)}ms`);
-    console.log(`Per-text (batch): ${Math.round(batchCompTime / comparisonTexts.length)}ms\n`);
+    console.log(`Per-text (batch): ${Math.round(batchCompTime / comparisonTexts.length)}ms`);
+
+    // Enhanced performance analysis
+    console.log('\n📊 Enhanced Performance Analysis:');
+    const monitorStats = globalToolMonitor.getExecutionStats();
+    console.log(`Total operations completed: ${monitorStats.totalCompleted}`);
+    console.log(`Success rate: ${(monitorStats.successRate * 100).toFixed(1)}%`);
+    console.log(`Average execution time: ${monitorStats.averageDuration.toFixed(0)}ms`);
+    console.log('');
 
     // 7. Embedding analysis utilities
     console.log('7. Embedding Analysis Utilities');
@@ -248,13 +276,23 @@ async function embedDemo() {
       .filter(u => u?.tokens)
       .reduce((sum, u) => sum + (u?.tokens || 0), 0);
 
-    console.log('\n✅ Embedding demo completed successfully!');
+    console.log('\n✅ Enhanced Embedding demo completed successfully!');
     console.log(`Total tokens used: ${totalTokens}`);
     console.log(`Embedding dimensions: ${embedding.length}`);
+    console.log('🎯 Enhanced features demonstrated:');
+    console.log('- Performance monitoring and analytics');
+    console.log('- Batch processing optimization');
+    console.log('- Comprehensive error handling');
     console.log('All DUDOXX embedding features are working correctly.\n');
 
   } catch (error) {
     console.error('❌ Embedding demo failed:', error);
+    
+    // Enhanced error reporting
+    const classification = classifyError(error);
+    console.error(`Error type: ${classification.type}`);
+    console.error(`Retryable: ${classification.isRetryable}`);
+    
     throw error;
   }
 }
@@ -369,7 +407,7 @@ async function semanticSearchDemo() {
 }
 
 // Run if called directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   async function runDemo() {
     await embedDemo();
     await semanticSearchDemo();

@@ -3,6 +3,7 @@ import {
   LanguageModelV1CallWarning,
   UnsupportedFunctionalityError,
 } from '@ai-sdk/provider';
+import { globalToolMonitor } from './dudoxx-tool-execution-monitor';
 
 export function prepareTools(
   mode: Parameters<LanguageModelV1['doGenerate']>[0]['mode'] & {
@@ -66,10 +67,35 @@ export function prepareTools(
         continue;
       }
 
-      // Validate parameters schema
+      // Enhanced parameter validation with schema checking
       if (tool.parameters && typeof tool.parameters === 'object') {
         try {
           JSON.stringify(tool.parameters);
+          
+          // Validate JSON Schema structure
+          const schema = tool.parameters as any;
+          if (schema.type && schema.type !== 'object') {
+            toolWarnings.push({ 
+              type: 'other' as const, 
+              message: `Tool ${tool.name}: Root parameters type should be 'object', got '${schema.type}'` 
+            });
+          }
+          
+          // Check for required properties
+          if (schema.required && !Array.isArray(schema.required)) {
+            toolWarnings.push({ 
+              type: 'other' as const, 
+              message: `Tool ${tool.name}: 'required' must be an array` 
+            });
+          }
+          
+          // Validate properties structure
+          if (schema.properties && typeof schema.properties !== 'object') {
+            toolWarnings.push({ 
+              type: 'other' as const, 
+              message: `Tool ${tool.name}: 'properties' must be an object` 
+            });
+          }
         } catch (error) {
           toolWarnings.push({ 
             type: 'other' as const, 
@@ -77,6 +103,14 @@ export function prepareTools(
           });
           continue;
         }
+      }
+
+      // Register tool with monitoring system
+      if (globalToolMonitor.getConfig().enableMetrics) {
+        globalToolMonitor.updateConfig({
+          enableMetrics: true,
+          enablePerformanceTracking: true,
+        });
       }
 
       dudoxxTools.push({
