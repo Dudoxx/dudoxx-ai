@@ -99,6 +99,71 @@ for await (const delta of textStream) {
 }
 ```
 
+### AI Agent Workflows
+
+#### Basic Agent with Tools
+```typescript
+import { generateText, tool } from 'ai';
+import { dudoxx } from 'dudoxx-ai-provider';
+import { z } from 'zod';
+
+const weatherTool = tool({
+  description: 'Get weather information for a city',
+  parameters: z.object({
+    city: z.string(),
+  }),
+  execute: async ({ city }) => ({
+    temperature: 22,
+    condition: 'sunny',
+  }),
+});
+
+const result = await generateText({
+  model: dudoxx('dudoxx'),
+  maxSteps: 5,
+  tools: { weather: weatherTool },
+  messages: [
+    { role: 'user', content: 'What is the weather like in Tokyo?' }
+  ],
+});
+```
+
+#### Streaming Agent Workflow
+```typescript
+import { generateText, streamText, tool } from 'ai';
+import { dudoxx } from 'dudoxx-ai-provider';
+
+// Phase 1: Execute tools with generateText
+const toolResult = await generateText({
+  model: dudoxx('dudoxx'),
+  maxSteps: 6,
+  tools: {
+    research: researchTool,
+    analyze: analysisTool,
+    decide: decisionTool,
+    plan: planningTool,
+  },
+  messages: [
+    { role: 'system', content: 'You are a business consultant...' },
+    { role: 'user', content: 'Evaluate this business opportunity...' }
+  ],
+});
+
+// Phase 2: Stream executive briefing
+const streamResult = await streamText({
+  model: dudoxx('dudoxx'),
+  maxTokens: 1500,
+  messages: [
+    { role: 'system', content: 'Present results as executive briefing...' },
+    { role: 'user', content: `Based on analysis: "${toolResult.text}"...` }
+  ],
+});
+
+for await (const delta of streamResult.textStream) {
+  process.stdout.write(delta);
+}
+```
+
 ## Environment Variables
 
 Make sure these are set in your `.env.local`:
@@ -119,6 +184,8 @@ DUDOXX_REASONING_EFFORT=medium
 ✅ **Embedding Models**: `embedder`  
 ✅ **Tool Calling**: Full function calling support  
 ✅ **Streaming**: Real-time text streaming  
+✅ **AI Agent Workflows**: Multi-step reasoning with tools  
+✅ **Streaming Agents**: Tool execution + live streaming presentation  
 ✅ **Custom Parameters**: Reasoning effort, DUDOXX-specific options  
 ✅ **Error Handling**: Comprehensive error handling  
 ✅ **Type Safety**: Full TypeScript support  
@@ -152,6 +219,11 @@ npm run type-check
 
 # Lint
 npm run lint
+
+# Run examples
+npm run example:agent-workflow        # Basic agent with tools
+npm run example:agent-streaming       # Streaming agent workflow
+npm run example:streaming-tools       # Streaming with parallel tools
 ```
 
 ## Migration from Old Provider

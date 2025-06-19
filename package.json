@@ -1,6 +1,6 @@
 {
   "name": "dudoxx-ai",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "type": "module",
   "license": "MIT",
   "private": false,
@@ -32,7 +32,8 @@
     "example:working-streaming": "tsx examples/working-streaming-tools.ts",
     "example:simple-streaming": "tsx examples/simple-streaming.ts",
     "example:parallel-tools": "tsx examples/parallel-tool-calls-test.ts",
-    "example:agent-workflow": "tsx examples/agent-workflow.ts"
+    "example:agent-workflow": "tsx examples/agent-workflow.ts",
+    "example:agent-streaming": "tsx examples/agent-streaming-workflow.ts"
   },
   "exports": {
     "./package.json": "./package.json",

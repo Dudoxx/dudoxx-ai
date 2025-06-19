@@ -20,6 +20,8 @@ The DUDOXX AI Provider is a production-ready TypeScript package that seamlessly 
 - **🧠 Advanced Reasoning**: Support for DUDOXX reasoning models with configurable effort levels
 - **⚡ High Performance**: Optimized for production workloads with streaming support
 - **🔧 Tool Integration**: Built-in support for function calling and tool execution
+- **🤖 AI Agent Workflows**: Multi-step reasoning with intelligent tool orchestration
+- **🌊 Streaming Agents**: Real-time tool execution with live streaming presentation
 - **📊 Embeddings**: Text embedding generation for semantic search and RAG applications
 - **🎯 Type Safety**: Full TypeScript support with comprehensive type definitions
 - **🔄 Streaming**: Real-time response streaming for interactive applications
@@ -237,7 +239,93 @@ const { embedding: vector } = await embed({
 console.log(vector); // Float array representing the text
 ```
 
-### 6. Batch Embeddings
+### 6. AI Agent Workflows
+
+```typescript
+import { generateText, tool } from 'ai';
+import { z } from 'zod';
+
+// Define specialized tools
+const researchTool = tool({
+  description: 'Research information about a topic',
+  parameters: z.object({
+    topic: z.string(),
+    focus: z.string().optional(),
+  }),
+  execute: async ({ topic, focus }) => {
+    // Your research logic here
+    return { findings: ['insight1', 'insight2'], confidence: 85 };
+  },
+});
+
+const analysisTool = tool({
+  description: 'Analyze data and provide insights',
+  parameters: z.object({
+    data: z.string(),
+    analysisType: z.enum(['financial', 'market', 'technical']),
+  }),
+  execute: async ({ data, analysisType }) => {
+    // Your analysis logic here
+    return { insights: ['recommendation1', 'recommendation2'], score: 92 };
+  },
+});
+
+// Execute agent workflow
+const result = await generateText({
+  model: dudoxx('dudoxx'),
+  maxSteps: 8, // Allow multi-step reasoning
+  tools: {
+    research: researchTool,
+    analyze: analysisTool,
+  },
+  messages: [
+    {
+      role: 'system',
+      content: 'You are a business consultant. Use tools systematically to provide comprehensive analysis.',
+    },
+    {
+      role: 'user',
+      content: 'Evaluate the AI e-commerce market opportunity and provide strategic recommendations.',
+    },
+  ],
+});
+
+console.log(result.text);
+```
+
+### 7. Streaming Agent Workflow
+
+```typescript
+import { generateText, streamText } from 'ai';
+
+// Phase 1: Execute tools for comprehensive analysis
+const toolResult = await generateText({
+  model: dudoxx('dudoxx'),
+  maxSteps: 6,
+  tools: { research: researchTool, analyze: analysisTool },
+  messages: [
+    { role: 'system', content: 'Use tools to gather comprehensive data...' },
+    { role: 'user', content: 'Analyze the healthcare AI market...' }
+  ],
+});
+
+// Phase 2: Stream executive presentation
+const streamResult = await streamText({
+  model: dudoxx('dudoxx'),
+  maxTokens: 1500,
+  messages: [
+    { role: 'system', content: 'Present results as executive briefing...' },
+    { role: 'user', content: `Based on analysis: "${toolResult.text}"...` }
+  ],
+});
+
+console.log('🎙️ Executive Briefing:');
+for await (const delta of streamResult.textStream) {
+  process.stdout.write(delta);
+}
+```
+
+### 8. Batch Embeddings
 
 ```typescript
 import { embedMany } from 'ai';
@@ -416,10 +504,13 @@ Develop AI-powered code completion and programming assistance tools.
 ### 4. Semantic Search
 Implement vector search and recommendation systems using embeddings.
 
-### 5. Tool Integration
+### 5. AI Agent Workflows
+Build intelligent multi-step reasoning systems with tool orchestration.
+
+### 6. Tool Integration
 Build AI agents that can interact with external APIs and services.
 
-### 6. Data Analysis
+### 7. Data Analysis
 Perform complex data analysis and insights generation.
 
 ## 🔍 API Reference
@@ -708,6 +799,11 @@ npm run build
 
 # Lint code
 npm run lint
+
+# Run examples
+npm run example:agent-workflow        # Basic agent with tools
+npm run example:agent-streaming       # Streaming agent workflow
+npm run example:streaming-tools       # Streaming with parallel tools
 ```
 
 ## 📝 Changelog
