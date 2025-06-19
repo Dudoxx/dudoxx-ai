@@ -7,12 +7,17 @@
  */
 
 import dotenv from 'dotenv';
-import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { generateText } from 'ai';
 import { dudoxx, aiSdkWeatherTool } from '../src/index';
 
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 // Load environment variables
-dotenv.config({ path: path.join(__dirname, '../.env.local') });
+dotenv.config({ path: join(__dirname, '../.env.local') });
 
 async function simpleWeatherExample() {
   console.log('🌤️ Simple Weather Tool Example\n');
