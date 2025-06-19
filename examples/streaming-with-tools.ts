@@ -2,14 +2,15 @@
 
 /**
  * Streaming with Tools Example
- * Demonstrates streaming responses with tool calls and final formatted response
+ * Demonstrates streaming responses with parallel tool execution using generateText + streamText workflow
  */
 
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { streamText } from 'ai';
-import { dudoxx, aiSdkWeatherTool } from '../src/index';
+import { generateText, streamText, tool } from 'ai';
+import { z } from 'zod';
+import { dudoxx } from '../src/index';
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -18,8 +19,89 @@ const __dirname = dirname(__filename);
 // Load environment variables
 dotenv.config({ path: join(__dirname, '../.env.local') });
 
+// Global counter for tracking tool executions across parallel calls
+let globalToolExecutionCount = 0;
+
+// Enhanced weather tool for streaming demo
+const weatherTool = tool({
+  description: 'Get current weather information for a specified location',
+  parameters: z.object({
+    city: z.string().describe('The city name'),
+    country: z.string().optional().describe('The country code (optional)'),
+  }),
+  execute: async ({ city, country }) => {
+    // Simulate API delay for realistic streaming
+    await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
+    
+    const location = country ? `${city}, ${country}` : city;
+    globalToolExecutionCount++;
+    
+    console.log(`🔧 WEATHER TOOL EXECUTED for ${location} (#${globalToolExecutionCount})`);
+    
+    return {
+      location,
+      temperature: Math.floor(Math.random() * 30) + 10,
+      condition: ['sunny', 'cloudy', 'rainy', 'snowy'][Math.floor(Math.random() * 4)],
+      humidity: Math.floor(Math.random() * 100),
+      windSpeed: Math.floor(Math.random() * 20) + 5,
+      message: `Current weather in ${location}`,
+    };
+  },
+});
+
+// Time tool for parallel execution
+const timeTool = tool({
+  description: 'Get current time for a location',
+  parameters: z.object({
+    location: z.string().describe('Location to get time for'),
+  }),
+  execute: async ({ location }) => {
+    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 300));
+    
+    globalToolExecutionCount++;
+    console.log(`🕐 TIME TOOL EXECUTED for ${location} (#${globalToolExecutionCount})`);
+    
+    const now = new Date();
+    return {
+      location,
+      currentTime: now.toLocaleTimeString(),
+      timezone: 'UTC',
+      timestamp: now.toISOString(),
+    };
+  },
+});
+
+// Travel recommendation tool for parallel execution
+const travelTool = tool({
+  description: 'Get travel recommendations for a city',
+  parameters: z.object({
+    city: z.string().describe('City to get recommendations for'),
+  }),
+  execute: async ({ city }) => {
+    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500));
+    
+    globalToolExecutionCount++;
+    console.log(`🗺️ TRAVEL TOOL EXECUTED for ${city} (#${globalToolExecutionCount})`);
+    
+    const recommendations = [
+      'Visit local museums',
+      'Try traditional cuisine',
+      'Explore historic districts',
+      'Take walking tours',
+      'Visit parks and gardens'
+    ];
+    
+    return {
+      city,
+      recommendations: recommendations.slice(0, 3),
+      bestTimeToVisit: 'Spring or Fall',
+      message: `Travel recommendations for ${city}`,
+    };
+  },
+});
+
 async function testStreamingWithTools() {
-  console.log('🌊 Testing Streaming with Tools\n');
+  console.log('🌊 Testing Streaming with Parallel Tool Execution\n');
 
   console.log('Environment check:');
   console.log(`- DUDOXX_API_KEY: ${process.env.DUDOXX_API_KEY ? '✅ Set' : '❌ Missing'}`);
@@ -27,100 +109,102 @@ async function testStreamingWithTools() {
   console.log('');
 
   try {
-    console.log('🔄 Starting streaming request with weather tool...\n');
-
-    const result = await streamText({
+    console.log('📋 Strategy: DUDOXX provider uses generateText for tools + streamText for final response\n');
+    
+    // Step 1: Execute tools with generateText for parallel execution
+    console.log('🔄 Step 1: Executing parallel tool calls...\n');
+    
+    const toolResult = await generateText({
       model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
         temperature: 0.7,
       }),
-      maxTokens: 500,
+      maxTokens: 1000,
       tools: {
-        get_weather: aiSdkWeatherTool,
+        get_weather: weatherTool,
+        get_time: timeTool,
+        get_travel_info: travelTool,
       },
-      maxSteps: 5, // Allow multiple steps for tool calls and final response
+      maxSteps: 5,
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful weather assistant. When asked about weather, use the get_weather tool to fetch current conditions and provide a detailed, friendly response with recommendations.',
+          content: 'You are a helpful travel assistant. Use all available tools to gather comprehensive information about the cities mentioned. Call tools for each city when requested. Respond in French.',
         },
         {
           role: 'user',
-          content: 'What\'s the weather like in San Francisco? Should I bring a jacket?',
+          content: 'I need information about Paris and London. Get the weather, current time, and travel recommendations for both cities using all available tools.',
         },
       ],
     });
 
-    console.log('🔄 Processing stream...\n');
-
-    let finalText = '';
-    let toolCallCount = 0;
-    let stepCount = 0;
-
-    // Stream the response step by step
-    console.log('💬 Streaming conversation:');
+    console.log('\n✅ Tool execution completed!');
+    console.log(`📝 Steps taken: ${toolResult.steps.length}`);
+    console.log(`🔧 Total tool calls: ${globalToolExecutionCount}`);
     
-    // Use the fullStream which contains the raw streaming parts  
-    for await (const part of result.fullStream) {
-      
-      switch (part.type) {
-        case 'step-start':
-          stepCount++;
-          console.log(`\n📍 Step ${stepCount} started`);
-          break;
-          
-        case 'tool-call':
-          toolCallCount++;
-          console.log(`🔧 Tool Call ${toolCallCount}: ${part.toolName}`);
-          console.log(`   Args: ${JSON.stringify(part.args)}`);
-          break;
-          
-        case 'tool-result': {
-          console.log(`📊 Tool Result:`);
-          const toolResult = part.result as { message?: string; [key: string]: unknown };
-          if (toolResult?.message) {
-            console.log(`   ${toolResult.message}`);
-          } else {
-            console.log(`   ${JSON.stringify(toolResult, null, 2)}`);
-          }
-          break;
+    // Show tool execution details
+    for (let i = 0; i < toolResult.steps.length; i++) {
+      const step = toolResult.steps[i];
+      if (step.toolCalls && step.toolCalls.length > 0) {
+        console.log(`\n🔧 Step ${i + 1} - Tool calls executed:`);
+        for (const call of step.toolCalls) {
+          console.log(`   • ${call.toolName}: ${JSON.stringify(call.args)}`);
         }
-          
-        case 'text-delta':
-          if (!finalText) {
-            console.log('\n💬 Assistant response:');
-          }
-          process.stdout.write(part.textDelta);
-          finalText += part.textDelta;
-          break;
-          
-        case 'step-finish':
-          console.log(`\n✅ Step ${stepCount} completed`);
-          break;
-          
-        case 'finish':
-          console.log('\n🏁 Conversation finished');
-          break;
-          
-        default:
-          console.log(`🔍 Unknown part type: ${(part as { type?: string }).type || 'unknown'}`);
       }
     }
 
-    // Get final results
-    const finalResult = await result.text;
-    const usage = await result.usage;
+    console.log(`\n💬 Initial response from tools:\n${toolResult.text}\n`);
+
+    // Step 2: Stream a follow-up detailed response
+    console.log('🔄 Step 2: Streaming detailed recommendations...\n');
+
+    const streamResult = await streamText({
+      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
+        temperature: 0.8,
+      }),
+      maxTokens: 800,
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a helpful travel assistant. Based on the previous tool results, provide detailed, personalized travel recommendations with specific activities, restaurants, and tips. Be enthusiastic and helpful.',
+        },
+        {
+          role: 'user',
+          content: `Based on this information about Paris and London: "${toolResult.text}", please provide a detailed streaming response with specific travel recommendations, activities to do in this weather, and helpful tips for visiting both cities. Include restaurant recommendations and weather-appropriate activities.`,
+        },
+      ],
+    });
+
+    console.log('🌊 Streaming detailed response:');
+    console.log('─'.repeat(60));
+
+    let streamedText = '';
+    let charCount = 0;
+
+    for await (const delta of streamResult.textStream) {
+      process.stdout.write(delta);
+      streamedText += delta;
+      charCount += delta.length;
+    }
+
+    console.log(`\n📊 Streamed ${charCount} characters\n`);
+    console.log('─'.repeat(60));
+
+    // Final results
+    const toolUsage = toolResult.usage;
+    const streamUsage = await streamResult.usage;
     
-    console.log('\n\n📊 Final Results:');
+    console.log('\n📊 Final Results:');
     console.log('─'.repeat(40));
-    console.log(`🔢 Total Tokens: ${usage.totalTokens}`);
-    console.log(`🔢 Prompt Tokens: ${usage.promptTokens}`);
-    console.log(`🔢 Completion Tokens: ${usage.completionTokens}`);
+    console.log(`🔧 Tool calls executed: ${globalToolExecutionCount}`);
+    console.log(`📝 Tool execution tokens: ${toolUsage.totalTokens}`);
+    console.log(`🌊 Streaming tokens: Not available for DUDOXX provider`);
+    console.log(`📊 Total workflow: Tools + Streaming completed successfully`);
 
-    console.log('\n🎯 Complete Response:');
-    console.log('─'.repeat(40));
-    console.log(finalResult);
-
-    console.log('\n✅ Streaming with tools test completed successfully!');
+    console.log('\n✅ Complete streaming with tools workflow finished!');
+    console.log('\n📝 Summary:');
+    console.log('   1. ✅ Parallel tool execution with generateText');
+    console.log('   2. ✅ Real-time streaming response with streamText');
+    console.log('   3. ✅ DUDOXX provider handles both scenarios optimally');
 
   } catch (error) {
     console.error('❌ Streaming test failed:', error);
@@ -134,6 +218,10 @@ async function testStreamingWithTools() {
       if (error.message.includes('fetch') || error.message.includes('network')) {
         console.log('- Issue: Network/connection problem');
         console.log('- Solution: Check internet connection and DUDOXX_BASE_URL');
+      }
+      if (error.message.includes('tool')) {
+        console.log('- Issue: Tool execution problem');
+        console.log('- Solution: Check tool definitions and parameters');
       }
     }
     
