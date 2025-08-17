@@ -66,7 +66,7 @@ export interface DudoxxProvider extends ProviderV1 {
 export interface DudoxxProviderSettings {
   /**
    * Use a different URL prefix for API calls, e.g. to use proxy servers.
-   * The default prefix is `https://llm-proxy.dudoxx.com/v1`.
+   * Required: Must be provided either here or via DUDOXX_BASE_URL environment variable.
    */
   baseURL?: string;
 
@@ -94,9 +94,17 @@ export interface DudoxxProviderSettings {
 export function createDudoxx(
   options: DudoxxProviderSettings = {},
 ): DudoxxProvider {
-  const baseURL =
-    withoutTrailingSlash(options.baseURL) ??
-    'https://llm-proxy.dudoxx.com/v1';
+  // Lazy evaluation: Check environment variables when provider is used, not created
+  const getBaseURL = (): string => {
+    const envBaseURL = process.env.DUDOXX_BASE_URL;
+    if (!options.baseURL && !envBaseURL) {
+      throw new Error(
+        'DUDOXX_BASE_URL environment variable is required. Please set it in your .env file (e.g., DUDOXX_BASE_URL=https://llm-router.dudoxx.com/v1)'
+      );
+    }
+    const baseURL = options.baseURL ?? envBaseURL!;
+    return withoutTrailingSlash(baseURL) ?? baseURL;
+  };
 
   const getHeaders = () => ({
     Authorization: `Bearer ${loadApiKey({
@@ -114,7 +122,7 @@ export function createDudoxx(
   ) =>
     new DudoxxChatLanguageModel(modelId, settings, {
       provider: 'dudoxx.chat',
-      baseURL,
+      baseURL: getBaseURL(),
       headers: getHeaders,
       fetch: options.fetch,
     });
@@ -125,7 +133,7 @@ export function createDudoxx(
   ) =>
     new DudoxxEmbeddingModel(modelId, settings, {
       provider: 'dudoxx.embedding',
-      baseURL,
+      baseURL: getBaseURL(),
       headers: getHeaders,
       fetch: options.fetch,
     });
@@ -154,5 +162,6 @@ export function createDudoxx(
 
 /**
  * Default DUDOXX provider instance.
+ * Environment variables are validated when models are created, not at import time.
  */
 export const dudoxx = createDudoxx();

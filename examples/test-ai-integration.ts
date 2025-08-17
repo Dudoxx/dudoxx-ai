@@ -9,7 +9,7 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { generateText } from 'ai';
-import { dudoxx, aiSdkWeatherTool } from '../src/index';
+import { dudoxx, aiSdkWeatherTool, getRequiredChatModel, validateDudoxxEnvironment } from '../src/index';
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -21,17 +21,16 @@ dotenv.config({ path: join(__dirname, '../.env.local') });
 async function testAIIntegration() {
   console.log('🤖 Testing AI SDK Integration\n');
 
-  console.log('Environment check:');
-  console.log(`- DUDOXX_API_KEY: ${process.env.DUDOXX_API_KEY ? '✅ Set' : '❌ Missing'}`);
-  console.log(`- DUDOXX_BASE_URL: ${process.env.DUDOXX_BASE_URL || '❌ Missing'}`);
-  console.log(`- DUDOXX_MODEL_NAME: ${process.env.DUDOXX_MODEL_NAME || '❌ Missing'}`);
-  console.log('');
-
   try {
+    // Validate all required environment variables first
+    console.log('🔍 Validating environment variables...');
+    validateDudoxxEnvironment();
+    console.log('✅ All required environment variables are set\n');
+
     console.log('🔄 Making request to DUDOXX with weather tool...\n');
 
     const result = await generateText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
+      model: dudoxx(getRequiredChatModel(), {
         temperature: 0.7,
       }),
       maxTokens: 500,
@@ -100,15 +99,16 @@ async function testAIIntegration() {
     
     if (error instanceof Error) {
       console.log('\n🔍 Error Analysis:');
-      if (error.message.includes('API key')) {
+      if (error.message.includes('environment variable')) {
+        console.log('- Issue: Missing required environment variables');
+        console.log('- Solution: Check your .env.local file has all required DUDOXX_* variables');
+      } else if (error.message.includes('API key')) {
         console.log('- Issue: API key problem');
         console.log('- Solution: Check DUDOXX_API_KEY in .env.local');
-      }
-      if (error.message.includes('fetch') || error.message.includes('network')) {
+      } else if (error.message.includes('fetch') || error.message.includes('network')) {
         console.log('- Issue: Network/connection problem');
         console.log('- Solution: Check internet connection and DUDOXX_BASE_URL');
-      }
-      if (error.message.includes('model')) {
+      } else if (error.message.includes('model')) {
         console.log('- Issue: Model configuration problem');
         console.log('- Solution: Check DUDOXX_MODEL_NAME in .env.local');
       }

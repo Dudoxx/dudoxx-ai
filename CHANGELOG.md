@@ -1,6 +1,76 @@
 # @ai-sdk/dudoxx
 
-## 1.2.0
+## 1.3.1
+
+### 🔐 Security & Configuration Fixes
+
+- **BREAKING**: Removed hardcoded API endpoints - `DUDOXX_BASE_URL` environment variable now required
+- **BREAKING**: Updated default endpoint from `llm-proxy.dudoxx.com` to `llm-router.dudoxx.com`
+- **Enhanced**: Strict environment variable validation with clear error messages
+- **Added**: Configuration utility functions for required environment variables
+- **Fixed**: Provider initialization hanging issues when environment variables are missing
+
+### 🛠️ New Configuration Utilities
+
+- `getRequiredChatModel()` - Validates and returns `DUDOXX_MODEL_NAME` from environment
+- `getRequiredReasoningModel()` - Validates and returns `DUDOXX_REASONING_MODEL_NAME` from environment  
+- `getRequiredEmbeddingModel()` - Validates and returns `DUDOXX_EMBEDDING_MODEL_NAME` from environment
+- `getRequiredBaseURL()` - Validates and returns `DUDOXX_BASE_URL` from environment
+- `validateDudoxxEnvironment()` - Validates all required DUDOXX environment variables
+
+### 📋 Required Environment Variables
+
+All applications must now set these environment variables:
+
+```bash
+DUDOXX_API_KEY=your_api_key_here
+DUDOXX_BASE_URL=https://llm-router.dudoxx.com/v1
+DUDOXX_MODEL_NAME=dudoxx
+DUDOXX_REASONING_MODEL_NAME=dudoxx-reasoning
+DUDOXX_EMBEDDING_MODEL_NAME=embedder
+```
+
+### 🔧 Migration Guide
+
+**Update your .env file:**
+```bash
+# Change from old endpoint
+DUDOXX_BASE_URL=https://llm-router.dudoxx.com/v1
+
+# Add required model names
+DUDOXX_MODEL_NAME=dudoxx
+DUDOXX_REASONING_MODEL_NAME=dudoxx-reasoning
+DUDOXX_EMBEDDING_MODEL_NAME=embedder
+```
+
+**Use new strict pattern (recommended):**
+```typescript
+import { dudoxx, getRequiredChatModel, validateDudoxxEnvironment } from 'dudoxx-ai';
+
+// Validate environment on startup  
+validateDudoxxEnvironment();
+
+// Use environment-based model selection
+const result = await generateText({
+  model: dudoxx(getRequiredChatModel()),
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+### 📚 Documentation
+
+- Added `ENVIRONMENT_VARIABLE_REQUIREMENTS.md` with comprehensive migration guide
+- Updated examples to demonstrate strict environment variable patterns
+- Enhanced error messages with exact .env syntax needed
+
+### 🐛 Bug Fixes
+
+- Fixed provider hanging when connecting to outdated `llm-proxy.dudoxx.com` endpoint
+- Fixed TypeScript type errors in provider configuration
+- Fixed examples timing out due to hardcoded API endpoints
+- Fixed lazy evaluation of environment variables to prevent import-time errors
+
+## 1.3.0
 
 ### New Features
 

@@ -9,7 +9,7 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { generateText, streamText } from 'ai';
-import { dudoxx, aiSdkWeatherTool } from '../src/index';
+import { dudoxx, aiSdkWeatherTool, getRequiredChatModel, validateDudoxxEnvironment } from '../src/index';
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -21,12 +21,11 @@ dotenv.config({ path: join(__dirname, '../.env.local') });
 async function testWorkingStreamingWithTools() {
   console.log('🌊 Working Streaming with Tools Demo\n');
 
-  console.log('Environment check:');
-  console.log(`- DUDOXX_API_KEY: ${process.env.DUDOXX_API_KEY ? '✅ Set' : '❌ Missing'}`);
-  console.log(`- DUDOXX_BASE_URL: ${process.env.DUDOXX_BASE_URL || '❌ Missing'}`);
-  console.log('');
-
   try {
+    // Validate all required environment variables first
+    console.log('🔍 Validating environment variables...');
+    validateDudoxxEnvironment();
+    console.log('✅ All required environment variables are set\n');
     console.log('📋 Strategy: We\'ll use generateText with maxSteps for the complete flow');
     console.log('   Then demonstrate streaming for a follow-up response\n');
 
@@ -34,7 +33,7 @@ async function testWorkingStreamingWithTools() {
     console.log('🔄 Step 1: Complete tool interaction...\n');
     
     const toolResult = await generateText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
+      model: dudoxx(getRequiredChatModel(), {
         temperature: 0.7,
       }),
       maxTokens: 500,
@@ -63,7 +62,7 @@ async function testWorkingStreamingWithTools() {
     console.log('🔄 Step 2: Streaming follow-up response...\n');
 
     const streamResult = await streamText({
-      model: dudoxx(process.env.DUDOXX_MODEL_NAME || 'dudoxx', {
+      model: dudoxx(getRequiredChatModel(), {
         temperature: 0.7,
       }),
       maxTokens: 300,

@@ -57,3 +57,12 @@ export type {
   WeatherToolParams,
   WeatherInfo,
 } from './tools/weather-tool';
+
+// Configuration utilities for requiring environment variables
+export {
+  getRequiredChatModel,
+  getRequiredReasoningModel,
+  getRequiredEmbeddingModel,
+  getRequiredBaseURL,
+  validateDudoxxEnvironment,
+} from './dudoxx-config-utils';
