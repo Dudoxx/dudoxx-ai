@@ -7,5 +7,10 @@ export default defineConfig([
     external: ['zod'],
     dts: true,
     sourcemap: true,
+    outExtension({ format }) {
+      return {
+        js: format === 'esm' ? '.mjs' : '.js',
+      };
+    },
   },
 ]);
